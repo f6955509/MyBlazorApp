@@ -1,0 +1,116 @@
+﻿@page "/notes"
+@using BlazorDemoApp.Models
+@using BlazorDemoApp.Services
+@inject IMyNoteService myNoteService
+
+<h3>My Notes</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Change</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var noteItem in Notes)
+        {
+            <tr>
+                <td>@noteItem.Title</td>
+                <td><input type="button" class="btn btn-primary" value="Edit" @onclick="()=>EditItem(noteItem)"/></td>
+                <td><input type="button" class="btn btn-danger" value="Delete" @onclick="()=>DeleteItem(noteItem)"/></td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    <input type="button" class="btn btn-primary" value="New" @onclick="()=>AddItem()"/>
+</div>
+
+@if (showPopUp)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display:block">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Note Item</h5>
+                    <input type="button" class="btn-close" @onclick="()=>ClosePopUp()"/>
+                    <span aria-hidden="true" ></span>
+                </div>
+                <div class="moda-boday">
+                    <div class="row">
+                        <div class="col-9">
+                            <div class="row p-2">
+                                <EditForm Model="@currentMyNote" OnValidSubmit="()=>HandleValidSubmit()">
+                                    <DataAnnotationsValidator/>
+                                    <ValidationSummary/>
+                                    <div class="form-group">
+                                        <label for="taskName"></label>
+                                        <InputText id="name" class="form-control" @bind-Value="@currentMyNote.Title"></InputText>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save</button>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+}
+
+@code {
+    public List<MyNote> Notes { get; set; } = new List<MyNote>();
+    public bool isNewMode { get; set; } = false;
+    public bool showPopUp { get; set; } = false;
+    public MyNote currentMyNote { get; set; } = new MyNote();
+    public MyNote originalNote { get; set; }= new MyNote();
+
+    protected override async Task OnInitialized()
+    {
+        base.OnInitialized();
+        Notes = await myNoteService.RetrieveAsync();
+    }
+    public async void AddItem()
+    {
+        currentMyNote = new MyNote();
+        isNewMode = true;
+        showPopUp = true;
+
+    }
+
+    public async void DeleteItem(MyNote noteItem)
+    {
+        await myNoteService.DeleteAsync(noteItem);
+    }
+
+    public void EditItem(MyNote noteItem)
+    {
+        isNewMode = false;
+        showPopUp = true;
+        originalNote = noteItem.Clone();
+        currentMyNote = noteItem.Clone();
+    }
+
+    public void ClosePopUp()
+    {
+        showPopUp = false;
+    }
+    private async void HandleValidSubmit()
+    {
+        showPopUp = false;
+        if(isNewMode)
+        {
+        await myNoteService.CreateAsync(currentMyNote);
+        }
+        else
+        {
+        await myNoteService.UpdateAsync(originalNote, noteItem);
+        }
+
+        Notes = await myNoteService.RetrieveAsync();
+        StateHasChanged();
+
+    }
+}
