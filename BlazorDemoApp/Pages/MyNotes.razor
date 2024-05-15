@@ -67,9 +67,8 @@
     public MyNote currentMyNote { get; set; } = new MyNote();
     public MyNote originalNote { get; set; }= new MyNote();
 
-    protected override async Task OnInitialized()
+    protected override async void OnInitialized()
     {
-        base.OnInitialized();
         Notes = await myNoteService.RetrieveAsync();
     }
     public async void AddItem()
@@ -106,7 +105,7 @@
         }
         else
         {
-        await myNoteService.UpdateAsync(originalNote, noteItem);
+        await myNoteService.UpdateAsync(originalNote, currentMyNote);
         }
 
         Notes = await myNoteService.RetrieveAsync();
