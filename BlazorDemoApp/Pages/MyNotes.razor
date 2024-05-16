@@ -1,7 +1,7 @@
 ﻿@page "/notes"
 @using BlazorDemoApp.Models
 @using BlazorDemoApp.Services
-@inject IMyNoteService myNoteService
+@inject IMyNoteService MyNoteService
 
 <h3>My Notes</h3>
 <table class="table">
@@ -69,7 +69,7 @@
 
     protected override async void OnInitialized()
     {
-        Notes = await myNoteService.RetrieveAsync();
+        Notes = await MyNoteService.RetrieveAsync();
     }
     public async void AddItem()
     {
@@ -81,7 +81,7 @@
 
     public async void DeleteItem(MyNote noteItem)
     {
-        await myNoteService.DeleteAsync(noteItem);
+        await MyNoteService.DeleteAsync(noteItem);
     }
 
     public void EditItem(MyNote noteItem)
@@ -101,14 +101,14 @@
         showPopUp = false;
         if(isNewMode)
         {
-        await myNoteService.CreateAsync(currentMyNote);
+        await MyNoteService.CreateAsync(currentMyNote);
         }
         else
         {
-        await myNoteService.UpdateAsync(originalNote, currentMyNote);
+        await MyNoteService.UpdateAsync(originalNote, currentMyNote);
         }
 
-        Notes = await myNoteService.RetrieveAsync();
+        Notes = await MyNoteService.RetrieveAsync();
         StateHasChanged();
 
     }
